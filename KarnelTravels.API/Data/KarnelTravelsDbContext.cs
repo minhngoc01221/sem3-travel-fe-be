@@ -113,31 +113,35 @@ public class KarnelTravelsDbContext : DbContext
             entity.HasOne(b => b.TourPackage)
                 .WithMany(t => t.Bookings)
                 .HasForeignKey(b => b.TourPackageId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(b => b.Hotel)
                 .WithMany(h => h.Bookings)
                 .HasForeignKey(b => b.HotelId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(b => b.HotelRoom)
                 .WithMany(r => r.Bookings)
                 .HasForeignKey(b => b.HotelRoomId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(b => b.Resort)
                 .WithMany(r => r.Bookings)
                 .HasForeignKey(b => b.ResortId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(b => b.ResortRoom)
                 .WithMany(rr => rr.Bookings)
                 .HasForeignKey(b => b.ResortRoomId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(b => b.Transport)
                 .WithMany(t => t.Bookings)
                 .HasForeignKey(b => b.TransportId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(b => b.Promotion)
                 .WithMany(p => p.Bookings)
                 .HasForeignKey(b => b.PromotionId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(b => b.Restaurant)
+                .WithMany(r => r.Bookings)
+                .HasForeignKey(b => b.RestaurantId)
+                .OnDelete(DeleteBehavior.Restrict);
             entity.Property(e => e.Type).HasConversion<int>();
             entity.Property(e => e.Status).HasConversion<int>();
             entity.Property(e => e.PaymentStatus).HasConversion<int>();

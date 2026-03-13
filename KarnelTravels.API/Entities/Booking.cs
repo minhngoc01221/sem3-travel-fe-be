@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using KarnelTravels.API.Entities;
 
 namespace KarnelTravels.API.Entities;
 
@@ -19,10 +20,13 @@ public class Booking : BaseEntity
 
     public int Quantity { get; set; } = 1;
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal TotalAmount { get; set; }
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal? DiscountAmount { get; set; }
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal FinalAmount { get; set; }
 
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
@@ -97,6 +101,11 @@ public class Booking : BaseEntity
     [ForeignKey("PromotionId")]
     public virtual Promotion? Promotion { get; set; }
 
+    public Guid? RestaurantId { get; set; }
+
+    [ForeignKey("RestaurantId")]
+    public virtual Restaurant? Restaurant { get; set; }
+
     // Navigation property
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
@@ -106,7 +115,8 @@ public enum BookingType
     Tour = 0,
     Hotel = 1,
     Resort = 2,
-    Transport = 3
+    Transport = 3,
+    Restaurant = 4
 }
 
 public enum BookingStatus

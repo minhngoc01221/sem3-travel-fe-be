@@ -25,8 +25,10 @@ public class Resort : BaseEntity
 
     public string? Images { get; set; } // JSON array
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal? MinPrice { get; set; }
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal? MaxPrice { get; set; }
 
     public string? Amenities { get; set; } // JSON array: Pool, Spa, Gym, Bar, KidsClub
@@ -59,6 +61,7 @@ public class ResortRoom : BaseEntity
 
     public int MaxOccupancy { get; set; } = 2;
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal PricePerNight { get; set; }
 
     public string? BedType { get; set; }

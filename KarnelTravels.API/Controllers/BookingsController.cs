@@ -168,6 +168,7 @@ public class BookingsController : ControllerBase
             .Include(b => b.Hotel)
             .Include(b => b.Resort)
             .Include(b => b.Transport)
+            .Include(b => b.Restaurant)
             .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
 
         if (booking == null)
@@ -254,6 +255,291 @@ public class BookingsController : ControllerBase
         if (booking.Hotel != null) return booking.Hotel.Name;
         if (booking.Resort != null) return booking.Resort.Name;
         if (booking.Transport != null) return $"{booking.Transport.Type} - {booking.Transport.Route}";
+        if (booking.Restaurant != null) return booking.Restaurant.Name;
         return "Unknown";
+    }
+
+    // Hotel Booking
+    [HttpPost("hotel")]
+    public async Task<ActionResult<ApiResponse<BookingDto>>> BookHotel([FromBody] CreateBookingRequest request)
+    {
+        var userId = GetUserId();
+        var hotel = await _context.Hotels.FindAsync(request.HotelId);
+
+        if (hotel == null)
+        {
+            return BadRequest(new ApiResponse<BookingDto>
+            {
+                Success = false,
+                Message = "Hotel not found"
+            });
+        }
+
+        decimal price = 0;
+        if (request.HotelRoomId.HasValue)
+        {
+            var room = await _context.HotelRooms.FindAsync(request.HotelRoomId);
+            if (room != null) price = room.PricePerNight;
+        }
+
+        var nights = request.EndDate.HasValue && request.ServiceDate.HasValue
+            ? (int)(request.EndDate.Value - request.ServiceDate.Value).TotalDays
+            : 1;
+        price *= nights;
+
+        decimal discountAmount = 0;
+        if (!string.IsNullOrEmpty(request.PromoCode))
+        {
+            var promotion = await _context.Promotions
+                .FirstOrDefaultAsync(p => p.Code == request.PromoCode && p.IsActive);
+            if (promotion != null)
+            {
+                discountAmount = promotion.DiscountType == DiscountType.Percentage
+                    ? price * promotion.DiscountValue / 100
+                    : promotion.DiscountValue;
+            }
+        }
+
+        var finalAmount = price - discountAmount;
+        var bookingCode = $"KB-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+
+        var booking = new Booking
+        {
+            UserId = userId,
+            HotelId = request.HotelId,
+            HotelRoomId = request.HotelRoomId,
+            Type = BookingType.Hotel,
+            Status = BookingStatus.Pending,
+            ServiceDate = request.ServiceDate,
+            EndDate = request.EndDate,
+            Quantity = request.Quantity,
+            TotalAmount = price,
+            DiscountAmount = discountAmount,
+            FinalAmount = finalAmount,
+            PaymentStatus = PaymentStatus.Pending,
+            ContactName = request.ContactName,
+            ContactEmail = request.ContactEmail,
+            ContactPhone = request.ContactPhone,
+            Notes = request.Notes,
+            BookingCode = bookingCode,
+            ExpiredAt = DateTime.UtcNow.AddHours(24)
+        };
+
+        _context.Bookings.Add(booking);
+        await _context.SaveChangesAsync();
+
+        return Ok(new ApiResponse<BookingDto>
+        {
+            Success = true,
+            Message = "Hotel booking created successfully",
+            Data = new BookingDto
+            {
+                BookingId = booking.Id,
+                BookingCode = booking.BookingCode,
+                Type = booking.Type.ToString(),
+                Status = booking.Status.ToString(),
+                ServiceDate = booking.ServiceDate,
+                EndDate = booking.EndDate,
+                TotalAmount = booking.TotalAmount,
+                FinalAmount = booking.FinalAmount,
+                PaymentStatus = booking.PaymentStatus.ToString(),
+                CreatedAt = booking.CreatedAt,
+                ItemName = hotel.Name
+            }
+        });
+    }
+
+    // Resort Booking
+    [HttpPost("resort")]
+    public async Task<ActionResult<ApiResponse<BookingDto>>> BookResort([FromBody] CreateBookingRequest request)
+    {
+        var userId = GetUserId();
+        var resort = await _context.Resorts.FindAsync(request.ResortId);
+
+        if (resort == null)
+        {
+            return BadRequest(new ApiResponse<BookingDto>
+            {
+                Success = false,
+                Message = "Resort not found"
+            });
+        }
+
+        decimal price = 0;
+        if (request.ResortRoomId.HasValue)
+        {
+            var room = await _context.ResortRooms.FindAsync(request.ResortRoomId);
+            if (room != null) price = room.PricePerNight;
+        }
+
+        var nights = request.EndDate.HasValue && request.ServiceDate.HasValue
+            ? (int)(request.EndDate.Value - request.ServiceDate.Value).TotalDays
+            : 1;
+        price *= nights;
+
+        var bookingCode = $"KR-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+
+        var booking = new Booking
+        {
+            UserId = userId,
+            ResortId = request.ResortId,
+            ResortRoomId = request.ResortRoomId,
+            Type = BookingType.Resort,
+            Status = BookingStatus.Pending,
+            ServiceDate = request.ServiceDate,
+            EndDate = request.EndDate,
+            Quantity = request.Quantity,
+            TotalAmount = price,
+            FinalAmount = price,
+            PaymentStatus = PaymentStatus.Pending,
+            ContactName = request.ContactName,
+            ContactEmail = request.ContactEmail,
+            ContactPhone = request.ContactPhone,
+            Notes = request.Notes,
+            BookingCode = bookingCode,
+            ExpiredAt = DateTime.UtcNow.AddHours(24)
+        };
+
+        _context.Bookings.Add(booking);
+        await _context.SaveChangesAsync();
+
+        return Ok(new ApiResponse<BookingDto>
+        {
+            Success = true,
+            Message = "Resort booking created successfully",
+            Data = new BookingDto
+            {
+                BookingId = booking.Id,
+                BookingCode = booking.BookingCode,
+                Type = booking.Type.ToString(),
+                Status = booking.Status.ToString(),
+                ServiceDate = booking.ServiceDate,
+                TotalAmount = booking.TotalAmount,
+                FinalAmount = booking.FinalAmount,
+                PaymentStatus = booking.PaymentStatus.ToString(),
+                CreatedAt = booking.CreatedAt,
+                ItemName = resort.Name
+            }
+        });
+    }
+
+    // Transport Booking
+    [HttpPost("transport")]
+    public async Task<ActionResult<ApiResponse<BookingDto>>> BookTransport([FromBody] CreateBookingRequest request)
+    {
+        var userId = GetUserId();
+        var transport = await _context.Transports.FindAsync(request.TransportId);
+
+        if (transport == null)
+        {
+            return BadRequest(new ApiResponse<BookingDto>
+            {
+                Success = false,
+                Message = "Transport not found"
+            });
+        }
+
+        var price = transport.Price * request.Quantity;
+        var bookingCode = $"KT-TRANSPORT-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+
+        var booking = new Booking
+        {
+            UserId = userId,
+            TransportId = request.TransportId,
+            Type = BookingType.Transport,
+            Status = BookingStatus.Pending,
+            ServiceDate = request.ServiceDate,
+            Quantity = request.Quantity,
+            TotalAmount = price,
+            FinalAmount = price,
+            PaymentStatus = PaymentStatus.Pending,
+            ContactName = request.ContactName,
+            ContactEmail = request.ContactEmail,
+            ContactPhone = request.ContactPhone,
+            Notes = request.Notes,
+            BookingCode = bookingCode,
+            ExpiredAt = DateTime.UtcNow.AddHours(24)
+        };
+
+        _context.Bookings.Add(booking);
+        await _context.SaveChangesAsync();
+
+        return Ok(new ApiResponse<BookingDto>
+        {
+            Success = true,
+            Message = "Transport booking created successfully",
+            Data = new BookingDto
+            {
+                BookingId = booking.Id,
+                BookingCode = booking.BookingCode,
+                Type = booking.Type.ToString(),
+                Status = booking.Status.ToString(),
+                ServiceDate = booking.ServiceDate,
+                Quantity = booking.Quantity,
+                TotalAmount = booking.TotalAmount,
+                FinalAmount = booking.FinalAmount,
+                PaymentStatus = booking.PaymentStatus.ToString(),
+                CreatedAt = booking.CreatedAt,
+                ItemName = $"{transport.Type} - {transport.Route}"
+            }
+        });
+    }
+
+    // Restaurant Booking
+    [HttpPost("restaurant")]
+    public async Task<ActionResult<ApiResponse<BookingDto>>> BookRestaurant([FromBody] CreateBookingRequest request)
+    {
+        var userId = GetUserId();
+        var restaurant = await _context.Restaurants.FindAsync(request.RestaurantId);
+
+        if (restaurant == null)
+        {
+            return BadRequest(new ApiResponse<BookingDto>
+            {
+                Success = false,
+                Message = "Restaurant not found"
+            });
+        }
+
+        var bookingCode = $"KRES-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+
+        var booking = new Booking
+        {
+            UserId = userId,
+            RestaurantId = request.RestaurantId,
+            Type = BookingType.Restaurant,
+            Status = BookingStatus.Pending,
+            ServiceDate = request.ServiceDate,
+            Quantity = request.Quantity,
+            TotalAmount = 0,
+            FinalAmount = 0,
+            PaymentStatus = PaymentStatus.Pending,
+            ContactName = request.ContactName,
+            ContactEmail = request.ContactEmail,
+            ContactPhone = request.ContactPhone,
+            Notes = request.Notes,
+            BookingCode = bookingCode,
+            ExpiredAt = DateTime.UtcNow.AddHours(24)
+        };
+
+        _context.Bookings.Add(booking);
+        await _context.SaveChangesAsync();
+
+        return Ok(new ApiResponse<BookingDto>
+        {
+            Success = true,
+            Message = "Restaurant reservation created successfully",
+            Data = new BookingDto
+            {
+                BookingId = booking.Id,
+                BookingCode = booking.BookingCode,
+                Type = booking.Type.ToString(),
+                Status = booking.Status.ToString(),
+                ServiceDate = booking.ServiceDate,
+                Quantity = booking.Quantity,
+                CreatedAt = booking.CreatedAt,
+                ItemName = restaurant.Name
+            }
+        });
     }
 }

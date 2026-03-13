@@ -30,6 +30,7 @@ public class TouristSpot : BaseEntity
 
     public string? Images { get; set; } // JSON array of image URLs
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal? TicketPrice { get; set; }
 
     [MaxLength(500)]

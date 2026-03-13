@@ -30,6 +30,7 @@ public class Transport : BaseEntity
 
     public int DurationMinutes { get; set; }
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
 
     public int AvailableSeats { get; set; }

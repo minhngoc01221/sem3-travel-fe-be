@@ -18,10 +18,13 @@ public class Promotion : BaseEntity
 
     public DiscountType DiscountType { get; set; } = DiscountType.Percentage;
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal DiscountValue { get; set; }
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal? MinOrderAmount { get; set; }
 
+    [Column(TypeName = "decimal(18,2)")]
     public decimal? MaxDiscountAmount { get; set; }
 
     public DateTime StartDate { get; set; }
