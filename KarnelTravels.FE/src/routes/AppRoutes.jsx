@@ -90,6 +90,8 @@ const TransportsPage = () => (
 );
 
 // Admin Pages
+import AdminHotelsPage from '@/pages/admin/hotels/HotelsPage';
+
 const AdminDashboard = () => <DashboardPage />;
 
 const AdminUsers = () => (
@@ -112,11 +114,7 @@ const AdminTours = () => (
   </div>
 );
 
-const AdminHotels = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <h1 className="text-4xl font-bold text-gray-800">Quản lý khách sạn</h1>
-  </div>
-);
+const AdminHotels = () => <AdminHotelsPage />;
 
 const AdminRestaurants = () => (
   <div className="min-h-screen flex items-center justify-center">

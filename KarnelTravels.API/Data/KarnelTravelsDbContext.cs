@@ -14,6 +14,7 @@ public class KarnelTravelsDbContext : DbContext
     public DbSet<TouristSpot> TouristSpots => Set<TouristSpot>();
     public DbSet<Hotel> Hotels => Set<Hotel>();
     public DbSet<HotelRoom> HotelRooms => Set<HotelRoom>();
+    public DbSet<HotelRoomAvailability> HotelRoomAvailabilities => Set<HotelRoomAvailability>();
     public DbSet<Restaurant> Restaurants => Set<Restaurant>();
     public DbSet<Resort> Resorts => Set<Resort>();
     public DbSet<ResortRoom> ResortRooms => Set<ResortRoom>();
