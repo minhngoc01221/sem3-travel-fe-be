@@ -15,6 +15,7 @@ import HomePage from '@/pages/home/HomePage/HomePage';
 
 // Admin Dashboard
 import DashboardPage from '@/pages/admin/dashboard/DashboardPage';
+import TouristSpotsPage from '@/pages/admin/tourist-spots/TouristSpotsPage';
 
 const AboutPage = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -103,11 +104,7 @@ const AdminBookings = () => (
   </div>
 );
 
-const AdminDestinations = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <h1 className="text-4xl font-bold text-gray-800">Quản lý điểm du lịch</h1>
-  </div>
-);
+const AdminDestinations = () => <TouristSpotsPage />;
 
 const AdminTours = () => (
   <div className="min-h-screen flex items-center justify-center">

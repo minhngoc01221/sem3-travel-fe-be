@@ -94,6 +94,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseCors("AllowReactApp");
 
 app.UseAuthentication();

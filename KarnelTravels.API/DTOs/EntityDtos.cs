@@ -39,6 +39,12 @@ public class CreateTouristSpotRequest
     public bool IsFeatured { get; set; } = false;
 }
 
+public class ImageUploadResult
+{
+    public string Url { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
+}
+
 public class CreateRestaurantRequest
 {
     public string Name { get; set; } = string.Empty;

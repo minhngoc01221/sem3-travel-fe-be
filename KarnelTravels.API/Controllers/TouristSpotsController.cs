@@ -241,4 +241,141 @@ public class TouristSpotsController : ControllerBase
             Message = "Tourist spot deleted successfully"
         });
     }
+
+    [HttpPost("upload-image")]
+    [Authorize(Roles = "Admin,Moderator")]
+    public async Task<ActionResult<ApiResponse<ImageUploadResult>>> UploadImage(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new ApiResponse<ImageUploadResult>
+            {
+                Success = false,
+                Message = "Vui lòng chọn file hình ảnh"
+            });
+        }
+
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+        if (!allowedExtensions.Contains(fileExtension))
+        {
+            return BadRequest(new ApiResponse<ImageUploadResult>
+            {
+                Success = false,
+                Message = "Chỉ chấp nhận file hình ảnh: jpg, jpeg, png, gif, webp"
+            });
+        }
+
+        if (file.Length > 5 * 1024 * 1024)
+        {
+            return BadRequest(new ApiResponse<ImageUploadResult>
+            {
+                Success = false,
+                Message = "Kích thước file không được vượt quá 5MB"
+            });
+        }
+
+        try
+        {
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "tourist-spots");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}{fileExtension}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var imageUrl = $"/uploads/tourist-spots/{fileName}";
+
+            return Ok(new ApiResponse<ImageUploadResult>
+            {
+                Success = true,
+                Message = "Tải ảnh lên thành công",
+                Data = new ImageUploadResult
+                {
+                    Url = imageUrl,
+                    FileName = fileName
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResponse<ImageUploadResult>
+            {
+                Success = false,
+                Message = $"Lỗi khi tải ảnh: {ex.Message}"
+            });
+        }
+    }
+
+    [HttpPost("upload-images")]
+    [Authorize(Roles = "Admin,Moderator")]
+    public async Task<ActionResult<ApiResponse<List<ImageUploadResult>>>> UploadMultipleImages(IFormFile[] files)
+    {
+        if (files == null || files.Length == 0)
+        {
+            return BadRequest(new ApiResponse<List<ImageUploadResult>>
+            {
+                Success = false,
+                Message = "Vui lòng chọn ít nhất một file hình ảnh"
+            });
+        }
+
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        var results = new List<ImageUploadResult>();
+
+        try
+        {
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "tourist-spots");
+            Directory.CreateDirectory(uploadsFolder);
+
+            foreach (var file in files)
+            {
+                var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    continue;
+                }
+
+                if (file.Length > 5 * 1024 * 1024)
+                {
+                    continue;
+                }
+
+                var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                results.Add(new ImageUploadResult
+                {
+                    Url = $"/uploads/tourist-spots/{fileName}",
+                    FileName = fileName
+                });
+            }
+
+            return Ok(new ApiResponse<List<ImageUploadResult>>
+            {
+                Success = true,
+                Message = $"Tải {results.Count} ảnh lên thành công",
+                Data = results
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new ApiResponse<List<ImageUploadResult>>
+            {
+                Success = false,
+                Message = $"Lỗi khi tải ảnh: {ex.Message}"
+            });
+        }
+    }
 }
