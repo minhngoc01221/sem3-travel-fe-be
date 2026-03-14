@@ -4,7 +4,7 @@ import {
   Building2, 
   Utensils, 
   Palmtree, 
-  CalendarDollar, 
+  Receipt,
   Users,
   Ticket,
   TrendingUp,
@@ -53,7 +53,7 @@ const stats = [
     id: 'todayBookings',
     title: 'Đơn hàng hôm nay',
     value: 0,
-    icon: CalendarDollar,
+    icon: Receipt,
     color: 'from-cyan-500 to-cyan-600',
     bgColor: 'bg-cyan-50',
     iconColor: 'text-cyan-600'
