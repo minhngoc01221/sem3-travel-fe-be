@@ -31,7 +31,13 @@ public class Promotion : BaseEntity
 
     public DateTime EndDate { get; set; }
 
-    public string? ApplicableTo { get; set; } // JSON array: Tour, Hotel, Resort, Transport
+    public string? ApplicableTo { get; set; } // Kept for backward compatibility
+
+    public new bool IsActive { get; set; } = true;
+
+    public PromotionTargetType TargetType { get; set; } = PromotionTargetType.All;
+
+    public Guid? TargetId { get; set; }
 
     public bool ShowOnHome { get; set; } = false;
 
@@ -43,4 +49,14 @@ public enum DiscountType
 {
     Percentage = 0,
     FixedAmount = 1
+}
+
+public enum PromotionTargetType
+{
+    All = 0,
+    Tour = 1,
+    Hotel = 2,
+    Resort = 3,
+    Transport = 4,
+    Restaurant = 5
 }

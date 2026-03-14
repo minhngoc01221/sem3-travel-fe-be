@@ -153,6 +153,7 @@ public class KarnelTravelsDbContext : DbContext
         {
             entity.HasIndex(e => e.Code).IsUnique();
             entity.Property(e => e.DiscountType).HasConversion<int>();
+            entity.Property(e => e.TargetType).HasConversion<int>();
         });
 
         // Contact

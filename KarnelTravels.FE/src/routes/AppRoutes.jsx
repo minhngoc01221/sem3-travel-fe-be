@@ -87,6 +87,7 @@ const TransportsPage = () => (
 import AdminHotelsPage from '@/pages/admin/hotels/HotelsPage';
 import RoomDetailsPage from '@/pages/admin/hotels/RoomDetailsPage';
 import BookingsPage from '@/pages/admin/bookings/BookingsPage';
+import PromotionsPage from '@/pages/admin/promotions/PromotionsPage';
 
 const AdminDashboard = () => <DashboardPage />;
 
@@ -159,6 +160,7 @@ const AppRoutes = () => {
         <Route path="contact" element={<ContactPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="bookings" element={<BookingsPage />} />
+        <Route path="promotions" element={<PromotionsPage />} />
         <Route path="wishlist" element={<WishlistPage />} />
         <Route path="info/destinations" element={<DestinationsPage />} />
         <Route path="info/tours" element={<ToursPage />} />
@@ -178,6 +180,7 @@ const AppRoutes = () => {
         <Route path="hotels" element={<AdminHotels />} />
         <Route path="hotels/:hotelId/rooms" element={<RoomDetailsPage />} />
         <Route path="bookings" element={<BookingsPage />} />
+        <Route path="promotions" element={<PromotionsPage />} />
         <Route path="restaurants" element={<AdminRestaurants />} />
         <Route path="resorts" element={<AdminResorts />} />
         <Route path="transports" element={<AdminTransports />} />

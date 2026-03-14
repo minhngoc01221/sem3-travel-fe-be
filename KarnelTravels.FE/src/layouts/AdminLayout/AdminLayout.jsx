@@ -29,7 +29,8 @@ import {
   Bell,
   Search,
   LogOut,
-  User
+  User,
+  Tag
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -60,6 +61,11 @@ const AdminLayout = () => {
       title: 'Quản lý đặt tour',
       path: '/admin/bookings',
       icon: Calendar,
+    },
+    {
+      title: 'Quản lý khuyến mãi',
+      path: '/admin/promotions',
+      icon: Tag,
     },
     {
       title: 'Quản lý nội dung',
