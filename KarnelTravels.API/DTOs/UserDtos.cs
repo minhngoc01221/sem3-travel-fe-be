@@ -53,7 +53,7 @@ public class UpdateUserRequest
 /// <summary>
 /// Request thay đổi mật khẩu (Admin đặt lại)
 /// </summary>
-public class ResetPasswordRequest
+public class AdminResetPasswordRequest
 {
     public string NewPassword { get; set; } = string.Empty;
 }

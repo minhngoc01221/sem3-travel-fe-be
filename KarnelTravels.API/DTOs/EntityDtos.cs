@@ -459,25 +459,3 @@ public class CreateFavoriteRequest
     public string ItemType { get; set; } = string.Empty;
     public Guid ItemId { get; set; }
 }
-
-// Notification DTOs for SignalR
-public class BookingNotificationDto
-{
-    public Guid BookingId { get; set; }
-    public string BookingCode { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public string ItemName { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
-    public decimal TotalAmount { get; set; }
-    public DateTime CreatedAt { get; set; }
-}
-
-public class UnreadContactDto
-{
-    public Guid ContactId { get; set; }
-    public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string? ServiceType { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-}

@@ -278,7 +278,7 @@ public class AdminUsersController : ControllerBase
     /// F224: Thay đổi mật khẩu cho người dùng
     /// </summary>
     [HttpPost("{id:guid}/reset-password")]
-    public async Task<ActionResult<ApiResponse<string>>> ResetPassword(Guid id, [FromBody] ResetPasswordRequest request)
+    public async Task<ActionResult<ApiResponse<string>>> ResetPassword(Guid id, [FromBody] AdminResetPasswordRequest request)
     {
         try
         {
