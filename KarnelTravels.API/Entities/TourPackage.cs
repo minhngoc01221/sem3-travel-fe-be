@@ -50,23 +50,3 @@ public class TourPackage : BaseEntity
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
-
-public class TourItinerary : BaseEntity
-{
-    public int Day { get; set; }
-
-    [Required]
-    [MaxLength(200)]
-    public string Title { get; set; } = string.Empty;
-
-    [MaxLength(2000)]
-    public string? Description { get; set; }
-
-    public string? Activities { get; set; } // JSON array
-
-    // Foreign key
-    public Guid TourPackageId { get; set; }
-
-    [ForeignKey("TourPackageId")]
-    public virtual TourPackage? TourPackage { get; set; }
-}

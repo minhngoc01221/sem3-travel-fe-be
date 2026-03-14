@@ -124,9 +124,9 @@ public class ToursController : ControllerBase
                 Itineraries = tour.Itineraries.Select(i => new TourItineraryDto
                 {
                     ItineraryId = i.Id,
-                    Day = i.Day,
+                    DayNumber = i.DayNumber,
                     Title = i.Title,
-                    Description = i.Description,
+                    Content = i.Content,
                     Activities = string.IsNullOrEmpty(i.Activities) ? null : JsonSerializer.Deserialize<List<string>>(i.Activities)
                 }).ToList()
             }

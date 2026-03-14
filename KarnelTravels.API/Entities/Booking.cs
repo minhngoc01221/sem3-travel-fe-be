@@ -66,6 +66,11 @@ public class Booking : BaseEntity
     [ForeignKey("UserId")]
     public virtual User? User { get; set; }
 
+    public Guid? TourId { get; set; }
+
+    [ForeignKey("TourId")]
+    public virtual Tour? Tour { get; set; }
+
     public Guid? TourPackageId { get; set; }
 
     [ForeignKey("TourPackageId")]

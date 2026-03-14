@@ -52,6 +52,7 @@ builder.Services.AddScoped<ITransportProviderService, TransportProviderService>(
 builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<ITourService, TourService>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();

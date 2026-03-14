@@ -1,5 +1,6 @@
 namespace KarnelTravels.API.DTOs;
 
+using System.ComponentModel.DataAnnotations;
 using KarnelTravels.API.Entities;
 
 // TouristSpot DTOs
@@ -267,42 +268,6 @@ public class TourPackageDto
     public bool IsFeatured { get; set; }
     public bool IsNewArrival { get; set; }
     public bool IsHotDeal { get; set; }
-}
-
-public class TourItineraryDto
-{
-    public Guid ItineraryId { get; set; }
-    public int Day { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public List<string>? Activities { get; set; }
-}
-
-public class CreateTourRequest
-{
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public string Destination { get; set; } = string.Empty;
-    public int DurationDays { get; set; }
-    public decimal Price { get; set; }
-    public decimal? DiscountPrice { get; set; }
-    public List<string>? Images { get; set; }
-    public List<TourItineraryRequest>? Itineraries { get; set; }
-    public List<string>? Includes { get; set; }
-    public List<string>? Excludes { get; set; }
-    public int AvailableSlots { get; set; }
-    public List<string>? DepartureDates { get; set; }
-    public bool IsFeatured { get; set; } = false;
-    public bool IsNewArrival { get; set; } = false;
-    public bool IsHotDeal { get; set; } = false;
-}
-
-public class TourItineraryRequest
-{
-    public int Day { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public List<string>? Activities { get; set; }
 }
 
 // Booking DTOs
@@ -611,4 +576,281 @@ public class UpdateScheduleRequest
 public class UpdateVehicleStatusRequest
 {
     public VehicleStatus Status { get; set; }
+}
+
+// ==================== Tour Management DTOs ====================
+
+// Tour DTOs
+public class TourDto
+{
+    public Guid TourId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public int DurationDays { get; set; }
+    public int DurationNights { get; set; }
+    public decimal BasePrice { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string? ThumbnailUrl { get; set; }
+    public List<string>? Highlights { get; set; }
+    public string? Terms { get; set; }
+    public string? CancellationPolicy { get; set; }
+    public bool IsFeatured { get; set; }
+    public bool IsDomestic { get; set; }
+    public int BookingCount { get; set; }
+    public int TotalDepartures { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+public class TourWithDetailsDto : TourDto
+{
+    public List<TourItineraryDto> Itineraries { get; set; } = new();
+    public List<TourDestinationDto> Destinations { get; set; } = new();
+    public List<TourDepartureDto> Departures { get; set; } = new();
+    public List<TourServiceDto> Services { get; set; } = new();
+    public List<TourGuideDto> TourGuides { get; set; } = new();
+    public List<TourImageDto> Images { get; set; } = new();
+}
+
+public class CreateTourRequest
+{
+    [Required]
+    [MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
+
+    [MaxLength(3000)]
+    public string? Description { get; set; }
+
+    public int DurationDays { get; set; }
+    public int DurationNights { get; set; }
+    public decimal BasePrice { get; set; }
+    public TourStatus Status { get; set; } = TourStatus.Draft;
+    public string? ThumbnailUrl { get; set; }
+    public List<string>? Highlights { get; set; }
+    public string? Terms { get; set; }
+    public string? CancellationPolicy { get; set; }
+    public bool IsFeatured { get; set; }
+    public bool IsDomestic { get; set; } = true;
+}
+
+public class UpdateTourRequest
+{
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public int? DurationDays { get; set; }
+    public int? DurationNights { get; set; }
+    public decimal? BasePrice { get; set; }
+    public TourStatus? Status { get; set; }
+    public string? ThumbnailUrl { get; set; }
+    public List<string>? Highlights { get; set; }
+    public string? Terms { get; set; }
+    public string? CancellationPolicy { get; set; }
+    public bool? IsFeatured { get; set; }
+    public bool? IsDomestic { get; set; }
+}
+
+// Tour Itinerary DTOs
+public class TourItineraryDto
+{
+    public Guid ItineraryId { get; set; }
+    public int DayNumber { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string? Content { get; set; }
+    public List<string>? Meals { get; set; }
+    public string? Accommodation { get; set; }
+    public string? Transport { get; set; }
+    public List<string>? Activities { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class CreateTourItineraryRequest
+{
+    public int DayNumber { get; set; }
+
+    [Required]
+    [MaxLength(200)]
+    public string Title { get; set; } = string.Empty;
+
+    [MaxLength(5000)]
+    public string? Content { get; set; }
+
+    public List<string>? Meals { get; set; }
+    public string? Accommodation { get; set; }
+    public string? Transport { get; set; }
+    public List<string>? Activities { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class UpdateTourItineraryRequest
+{
+    public int? DayNumber { get; set; }
+    public string? Title { get; set; }
+    public string? Content { get; set; }
+    public List<string>? Meals { get; set; }
+    public string? Accommodation { get; set; }
+    public string? Transport { get; set; }
+    public List<string>? Activities { get; set; }
+    public string? Notes { get; set; }
+}
+
+// Tour Destination DTOs
+public class TourDestinationDto
+{
+    public Guid TourDestinationId { get; set; }
+    public Guid TouristSpotId { get; set; }
+    public string TouristSpotName { get; set; } = string.Empty;
+    public string? TouristSpotImage { get; set; }
+    public int DisplayOrder { get; set; }
+}
+
+public class AddTourDestinationRequest
+{
+    public Guid TouristSpotId { get; set; }
+    public int DisplayOrder { get; set; }
+}
+
+// Tour Departure DTOs
+public class TourDepartureDto
+{
+    public Guid DepartureId { get; set; }
+    public DateTime DepartureDate { get; set; }
+    public int AvailableSeats { get; set; }
+    public int TotalSeats { get; set; }
+    public decimal Price { get; set; }
+    public decimal? DiscountPrice { get; set; }
+    public bool IsAvailable { get; set; }
+    public string? Notes { get; set; }
+    public int BookedSeats { get; set; }
+}
+
+public class CreateTourDepartureRequest
+{
+    public DateTime DepartureDate { get; set; }
+    public int TotalSeats { get; set; }
+    public decimal Price { get; set; }
+    public decimal? DiscountPrice { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class UpdateTourDepartureRequest
+{
+    public DateTime? DepartureDate { get; set; }
+    public int? TotalSeats { get; set; }
+    public decimal? Price { get; set; }
+    public decimal? DiscountPrice { get; set; }
+    public bool? IsAvailable { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class BulkCreateDepartureRequest
+{
+    public List<DateTime> Dates { get; set; } = new();
+    public int TotalSeats { get; set; }
+    public decimal Price { get; set; }
+    public decimal? DiscountPrice { get; set; }
+    public string? Notes { get; set; }
+}
+
+// Tour Service DTOs
+public class TourServiceDto
+{
+    public Guid ServiceId { get; set; }
+    public string ServiceName { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public bool IsIncluded { get; set; }
+    public string Category { get; set; } = string.Empty;
+}
+
+public class CreateTourServiceRequest
+{
+    [Required]
+    [MaxLength(200)]
+    public string ServiceName { get; set; } = string.Empty;
+
+    [MaxLength(500)]
+    public string? Description { get; set; }
+
+    public bool IsIncluded { get; set; } = true;
+    public ServiceCategory Category { get; set; } = ServiceCategory.Other;
+}
+
+public class UpdateTourServiceRequest
+{
+    public string? ServiceName { get; set; }
+    public string? Description { get; set; }
+    public bool? IsIncluded { get; set; }
+    public ServiceCategory? Category { get; set; }
+}
+
+// Tour Guide DTOs
+public class TourGuideDto
+{
+    public Guid GuideId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+    public string? PhotoUrl { get; set; }
+    public List<string>? Specialties { get; set; }
+    public int YearsExperience { get; set; }
+    public bool IsAvailable { get; set; }
+}
+
+public class CreateTourGuideRequest
+{
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = string.Empty;
+
+    [MaxLength(20)]
+    public string? Phone { get; set; }
+
+    [MaxLength(255)]
+    public string? Email { get; set; }
+
+    [MaxLength(500)]
+    public string? PhotoUrl { get; set; }
+
+    public List<string>? Specialties { get; set; }
+    public int YearsExperience { get; set; }
+    public bool IsAvailable { get; set; } = true;
+}
+
+public class UpdateTourGuideRequest
+{
+    public string? Name { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+    public string? PhotoUrl { get; set; }
+    public List<string>? Specialties { get; set; }
+    public int? YearsExperience { get; set; }
+    public bool? IsAvailable { get; set; }
+}
+
+// Tour Image DTOs
+public class TourImageDto
+{
+    public Guid ImageId { get; set; }
+    public string ImageUrl { get; set; } = string.Empty;
+    public string? Caption { get; set; }
+    public int DisplayOrder { get; set; }
+    public bool IsPrimary { get; set; }
+}
+
+public class AddTourImageRequest
+{
+    [Required]
+    public string ImageUrl { get; set; } = string.Empty;
+
+    [MaxLength(200)]
+    public string? Caption { get; set; }
+
+    public int DisplayOrder { get; set; }
+    public bool IsPrimary { get; set; }
+}
+
+public class UpdateTourImageRequest
+{
+    public string? ImageUrl { get; set; }
+    public string? Caption { get; set; }
+    public int? DisplayOrder { get; set; }
+    public bool? IsPrimary { get; set; }
 }

@@ -33,6 +33,14 @@ public class KarnelTravelsDbContext : DbContext
     public DbSet<Route> Routes => Set<Route>();
     public DbSet<Schedule> Schedules => Set<Schedule>();
 
+    // Tour Management
+    public DbSet<Tour> Tours => Set<Tour>();
+    public DbSet<TourDestination> TourDestinations => Set<TourDestination>();
+    public DbSet<TourDeparture> TourDepartures => Set<TourDeparture>();
+    public DbSet<TourService> TourServices => Set<TourService>();
+    public DbSet<TourGuide> TourGuides => Set<TourGuide>();
+    public DbSet<TourImage> TourImages => Set<TourImage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -102,10 +110,6 @@ public class KarnelTravelsDbContext : DbContext
         {
             entity.HasIndex(e => e.Name);
             entity.HasIndex(e => e.Destination);
-            entity.HasMany(t => t.Itineraries)
-                .WithOne(i => i.TourPackage)
-                .HasForeignKey(i => i.TourPackageId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Booking
@@ -273,6 +277,75 @@ public class KarnelTravelsDbContext : DbContext
                 .HasForeignKey(s => s.VehicleId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.Property(e => e.Status).HasConversion<int>();
+        });
+
+        // Tour
+        modelBuilder.Entity<Tour>(entity =>
+        {
+            entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.Status);
+            entity.Property(e => e.Status).HasConversion<int>();
+            entity.HasMany(t => t.Itineraries)
+                .WithOne(i => i.Tour)
+                .HasForeignKey(i => i.TourId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(t => t.Destinations)
+                .WithOne(d => d.Tour)
+                .HasForeignKey(d => d.TourId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(t => t.Departures)
+                .WithOne(d => d.Tour)
+                .HasForeignKey(d => d.TourId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(t => t.Services)
+                .WithOne(s => s.Tour)
+                .HasForeignKey(s => s.TourId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(t => t.TourGuides)
+                .WithMany(g => g.Tours)
+                .UsingEntity(j => j.ToTable("TourTourGuides"));
+            entity.HasMany(t => t.Images)
+                .WithOne(i => i.Tour)
+                .HasForeignKey(i => i.TourId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(t => t.Bookings)
+                .WithOne(b => b.Tour)
+                .HasForeignKey(b => b.TourId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Tour Itinerary
+        modelBuilder.Entity<TourItinerary>(entity =>
+        {
+            entity.HasIndex(e => new { e.TourId, e.DayNumber }).IsUnique();
+        });
+
+        // Tour Destination
+        modelBuilder.Entity<TourDestination>(entity =>
+        {
+            entity.HasIndex(e => new { e.TourId, e.TouristSpotId }).IsUnique();
+            entity.HasOne(d => d.TouristSpot)
+                .WithMany()
+                .HasForeignKey(d => d.TouristSpotId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Tour Departure
+        modelBuilder.Entity<TourDeparture>(entity =>
+        {
+            entity.HasIndex(e => new { e.TourId, e.DepartureDate }).IsUnique();
+        });
+
+        // Tour Service
+        modelBuilder.Entity<TourService>(entity =>
+        {
+            entity.Property(e => e.Category).HasConversion<int>();
+        });
+
+        // Tour Guide
+        modelBuilder.Entity<TourGuide>(entity =>
+        {
+            entity.HasIndex(e => e.Email).IsUnique();
         });
     }
 }

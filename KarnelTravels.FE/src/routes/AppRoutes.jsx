@@ -53,12 +53,6 @@ const DestinationsPage = () => (
   </div>
 );
 
-const ToursPage = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <h1 className="text-4xl font-bold text-gray-800">Tour du lịch</h1>
-  </div>
-);
-
 const HotelsPage = () => (
   <div className="min-h-screen flex items-center justify-center">
     <h1 className="text-4xl font-bold text-gray-800">Khách sạn</h1>
@@ -85,6 +79,7 @@ import PromotionsPage from '@/pages/admin/promotions/PromotionsPage';
 import ContactsPage from '@/pages/admin/contacts/ContactsPage';
 import UsersManagement from '@/pages/admin/users/UsersManagement';
 import TransportsPage from '@/pages/admin/transports/TransportsPage';
+import ToursPage from '@/pages/admin/tours/ToursPage';
 
 const AdminDashboard = () => <DashboardPage />;
 
@@ -98,11 +93,7 @@ const AdminBookings = () => (
 
 const AdminDestinations = () => <TouristSpotsPage />;
 
-const AdminTours = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <h1 className="text-4xl font-bold text-gray-800">Quản lý tour</h1>
-  </div>
-);
+const AdminTours = () => <ToursPage />;
 
 const AdminHotels = () => <AdminHotelsPage />;
 
