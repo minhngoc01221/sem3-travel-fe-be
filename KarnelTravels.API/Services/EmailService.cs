@@ -9,6 +9,7 @@ public interface IEmailService
     Task<bool> SendEmailAsync(string toEmail, string subject, string body);
     Task<bool> SendBookingConfirmationAsync(string toEmail, string customerName, string bookingCode, 
         string serviceName, DateTime checkIn, DateTime checkOut, decimal totalAmount);
+    Task<bool> SendReplyEmailAsync(string toEmail, string customerName, string subject, string replyMessage, string originalMessage);
 }
 
 public class EmailService : IEmailService
@@ -142,5 +143,64 @@ public class EmailService : IEmailService
 </html>";
 
         return await SendEmailAsync(toEmail, subject, body);
+    }
+
+    public async Task<bool> SendReplyEmailAsync(
+        string toEmail, 
+        string customerName, 
+        string subject, 
+        string replyMessage,
+        string originalMessage)
+    {
+        var emailSubject = $"Re: {subject}";
+        
+        var body = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ background: #f9f9f9; padding: 25px; border-radius: 0 0 10px 10px; }}
+        .original-message {{ background: #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }}
+        .reply-message {{ background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #888; font-size: 12px; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h2>📩 Phản hồi từ Karnel Travels</h2>
+        </div>
+        <div class='content'>
+            <p>Xin chào <strong>{customerName}</strong>,</p>
+            
+            <p>Cảm ơn bạn đã liên hệ với chúng tôi. Dưới đây là phản hồi của chúng tôi:</p>
+            
+            <div class='original-message'>
+                <strong>Tin nhắn gốc:</strong><br/>
+                {originalMessage}
+            </div>
+            
+            <div class='reply-message'>
+                <strong>Phản hồi:</strong><br/>
+                {replyMessage}
+            </div>
+            
+            <p style='margin-top: 20px;'>Nếu bạn cần thêm thông tin, vui lòng liên hệ lại hoặc gọi hotline: <strong>1900 xxxx</strong></p>
+            
+            <p>Trân trọng,<br/>Đội ngũ Karnel Travels</p>
+        </div>
+        <div class='footer'>
+            <p>© 2026 Karnel Travels. All rights reserved.</p>
+            <p>Email: support@karneltravels.com | Hotline: 1900 xxxx</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        return await SendEmailAsync(toEmail, emailSubject, body);
     }
 }

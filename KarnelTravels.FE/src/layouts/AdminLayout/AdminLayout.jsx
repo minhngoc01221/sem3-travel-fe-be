@@ -30,7 +30,8 @@ import {
   Search,
   LogOut,
   User,
-  Tag
+  Tag,
+  MessageSquare
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -66,6 +67,11 @@ const AdminLayout = () => {
       title: 'Quản lý khuyến mãi',
       path: '/admin/promotions',
       icon: Tag,
+    },
+    {
+      title: 'Quản lý liên hệ',
+      path: '/admin/contacts',
+      icon: MessageSquare,
     },
     {
       title: 'Quản lý nội dung',
