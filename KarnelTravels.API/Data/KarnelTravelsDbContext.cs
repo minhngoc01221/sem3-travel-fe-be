@@ -172,7 +172,7 @@ public class KarnelTravelsDbContext : DbContext
             entity.HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(r => r.TouristSpot)
                 .WithMany(ts => ts.Reviews)
                 .HasForeignKey(r => r.TouristSpotId)
