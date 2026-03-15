@@ -3,18 +3,14 @@ import { useForm } from 'react-hook-form';
 import { getImageUrl } from '@/utils/imageUtils';
 import { 
   X, 
-  ImagePlus, 
   Loader2,
   MapPin,
   Star,
-  Globe,
-  DollarSign,
-  Calendar,
-  Upload,
   CloudUpload
 } from 'lucide-react';
 import touristSpotService from '@/services/touristSpotService';
 import toast from 'react-hot-toast';
+import CitySelect from '@/components/common/CitySelect/CitySelect';
 
 const TouristSpotForm = ({ 
   isOpen, 
@@ -24,7 +20,6 @@ const TouristSpotForm = ({
   isLoading 
 }) => {
   const [images, setImages] = useState([]);
-  const [imageInput, setImageInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
@@ -87,15 +82,6 @@ const TouristSpotForm = ({
       setImages([]);
     }
   }, [spot, reset, isOpen]);
-
-  const handleAddImage = () => {
-    if (imageInput.trim()) {
-      const newImages = [...images, imageInput.trim()];
-      setImages(newImages);
-      setValue('images', newImages);
-      setImageInput('');
-    }
-  };
 
   const handleRemoveImage = (index) => {
     const newImages = images.filter((_, i) => i !== index);
@@ -303,17 +289,12 @@ const TouristSpotForm = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Thành phố/Tỉnh <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  {...register('city', { required: 'Vui lòng nhập thành phố/tỉnh' })}
-                  className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all ${
-                    errors.city ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Ví dụ: Đà Nẵng, Hà Nội"
+                <CitySelect
+                  value={watch('city') || ''}
+                  onChange={(city) => setValue('city', city, { shouldValidate: true })}
+                  placeholder="Chọn thành phố"
+                  error={errors.city?.message}
                 />
-                {errors.city && (
-                  <p className="mt-1 text-sm text-red-500">{errors.city.message}</p>
-                )}
               </div>
             </div>
 
@@ -417,25 +398,6 @@ const TouristSpotForm = ({
                 </button>
               </div>
 
-              {/* URL Input */}
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="url"
-                  value={imageInput}
-                  onChange={(e) => setImageInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImage())}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all"
-                  placeholder="Hoặc nhập URL hình ảnh và nhấn Enter"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddImage}
-                  className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
-                >
-                  <ImagePlus className="w-4 h-4" />
-                  Thêm
-                </button>
-              </div>
               {images.length > 0 && (
                 <div className="grid grid-cols-4 gap-2 mt-3">
                   {images.map((img, index) => (

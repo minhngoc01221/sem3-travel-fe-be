@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Upload, Loader2 } from 'lucide-react';
 
 const TransportForm = ({ isOpen, onClose, onSave, mode, data, vehicleTypes, providers }) => {
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: data?.name || '',
     licensePlate: data?.licensePlate || '',
@@ -41,6 +43,34 @@ const TransportForm = ({ isOpen, onClose, onSave, mode, data, vehicleTypes, prov
       status: formData.status
     };
     onSave(submitData);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formDataImg = new FormData();
+      formDataImg.append('file', file);
+
+      const token = localStorage.getItem('token');
+      const res = await fetch('https://localhost:5000/api/upload', {
+        method: 'POST',
+        body: formDataImg,
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+
+      const data = await res.json();
+      setFormData({ ...formData, imageUrl: data.url || data.data?.url });
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -139,14 +169,34 @@ const TransportForm = ({ isOpen, onClose, onSave, mode, data, vehicleTypes, prov
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL hình ảnh</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hình ảnh</label>
             <input
-              type="url"
-              value={formData.imageUrl}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="https://example.com/image.jpg"
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
             />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-teal-500 hover:bg-teal-50 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {isUploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+                Tải ảnh lên
+              </button>
+              {formData.imageUrl && (
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden border">
+                  <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
           </div>
 
           <div>

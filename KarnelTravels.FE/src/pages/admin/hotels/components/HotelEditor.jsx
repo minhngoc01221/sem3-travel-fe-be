@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form'; 
 import { 
-  X, Upload, Image as ImageIcon, Star, Plus, Trash2, 
-  MapPin, Phone, Mail, Clock, DollarSign, CheckCircle, XCircle,
-  GripVertical, FileImage, Loader2
+  X, Upload, Trash2, 
+  MapPin, CheckCircle, XCircle, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import CitySelect from '@/components/common/CitySelect/CitySelect';
 
 const AMENITIES_OPTIONS = [
   'Wifi', 'Pool', 'Restaurant', 'Gym', 'Spa', 'Parking', 
@@ -22,7 +22,6 @@ const HotelEditor = ({
   mode = 'create' // 'create' or 'edit'
 }) => {
   const [images, setImages] = useState(hotel?.images || []);
-  const [newImageUrl, setNewImageUrl] = useState('');
   const [selectedAmenities, setSelectedAmenities] = useState(hotel?.amenities || []);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -49,13 +48,6 @@ const HotelEditor = ({
   if (hotel && isOpen && !errors.name) {
     // Form is already populated
   }
-
-  const handleAddImageUrl = () => {
-    if (newImageUrl.trim()) {
-      setImages([...images, newImageUrl.trim()]);
-      setNewImageUrl('');
-    }
-  };
 
   const handleRemoveImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
@@ -241,14 +233,12 @@ const HotelEditor = ({
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Thành phố <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    {...register('city', { required: 'Thành phố là bắt buộc' })}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ví dụ: Đà Nẵng"
+                  <CitySelect
+                    value={watch('city') || ''}
+                    onChange={(city) => setValue('city', city, { shouldValidate: true })}
+                    placeholder="Chọn thành phố"
+                    error={errors.city?.message}
                   />
-                  {errors.city && (
-                    <p className="mt-1 text-sm text-red-500">{errors.city.message}</p>
-                  )}
                 </div>
 
                 <div>
@@ -478,49 +468,30 @@ const HotelEditor = ({
                   </div>
                 )}
 
-                {/* URL input */}
-                <div className="mt-4 flex gap-2">
-                  <input
-                    type="url"
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                    placeholder="Nhập URL hình ảnh..."
-                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddImageUrl}
-                    className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                  >
-                    <Plus size={18} />
-                    <span>Thêm</span>
-                  </button>
-                </div>
-
                 {/* Image preview */}
-                {images.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {images.map((img, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={img}
-                          alt={`Hình ảnh ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                          onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/300x200?text=Image+Error';
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {images.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {images.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={img}
+                        alt={`Hình ảnh ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/300x200?text=Image+Error';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               </div>
 
               {/* Cancellation Policy */}

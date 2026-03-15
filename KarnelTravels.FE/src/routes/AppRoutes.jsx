@@ -101,11 +101,9 @@ const AdminResorts = () => <AdminResortsPage />;
 
 const AdminTransports = () => <TransportsPage />;
 
-const AdminReports = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <h1 className="text-4xl font-bold text-gray-800">Báo cáo & Thống kê</h1>
-  </div>
-);
+import ReportsPage from '@/pages/admin/reports/ReportsPage';
+
+const AdminReports = () => <ReportsPage />;
 
 const AdminSettings = () => (
   <div className="min-h-screen flex items-center justify-center">

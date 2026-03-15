@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
-import { X, Save, Upload, Image as ImageIcon, Plus, Trash2, MapPin, Star } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Save, Upload, Image as ImageIcon, Plus, Trash2, MapPin, Star, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import tourService from '@/services/tourService';
 
 const TourEditor = ({ tour, onClose, onSaved }) => {
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -108,16 +110,33 @@ const TourEditor = ({ tour, onClose, onSaved }) => {
     }
   };
 
-  const handleAddImage = async () => {
+  const handleAddImage = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     if (!tour?.tourId) {
       toast.error('Vui lòng lưu tour trước khi thêm hình ảnh');
       return;
     }
 
-    const imageUrl = prompt('Nhập URL hình ảnh:');
-    if (!imageUrl) return;
-
+    setIsUploading(true);
     try {
+      const formDataImg = new FormData();
+      formDataImg.append('file', file);
+
+      const uploadRes = await fetch('https://localhost:5000/api/upload', {
+        method: 'POST',
+        body: formDataImg,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!uploadRes.ok) throw new Error('Upload failed');
+
+      const uploadData = await uploadRes.json();
+      const imageUrl = uploadData.url || uploadData.data?.url;
+
       const res = await tourService.addImage(tour.tourId, {
         imageUrl,
         displayOrder: images.length,
@@ -128,7 +147,11 @@ const TourEditor = ({ tour, onClose, onSaved }) => {
         toast.success('Thêm hình ảnh thành công');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       toast.error('Lỗi khi thêm hình ảnh');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -143,6 +166,39 @@ const TourEditor = ({ tour, onClose, onSaved }) => {
       }
     } catch (error) {
       toast.error('Lỗi khi xóa hình ảnh');
+    }
+  };
+
+  const handleThumbnailChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formDataImg = new FormData();
+      formDataImg.append('file', file);
+
+      const uploadRes = await fetch('https://localhost:5000/api/upload', {
+        method: 'POST',
+        body: formDataImg,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!uploadRes.ok) throw new Error('Upload failed');
+
+      const uploadData = await uploadRes.json();
+      const imageUrl = uploadData.url || uploadData.data?.url;
+
+      setFormData({ ...formData, thumbnailUrl: imageUrl });
+      toast.success('Tải ảnh bìa thành công');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Lỗi khi tải ảnh bìa');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -286,20 +342,42 @@ const TourEditor = ({ tour, onClose, onSaved }) => {
 
           {/* Thumbnail */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL Hình ảnh bìa</label>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                name="thumbnailUrl"
-                value={formData.thumbnailUrl}
-                onChange={handleChange}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                placeholder="https://example.com/image.jpg"
-              />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hình ảnh bìa</label>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleThumbnailChange}
+              className="hidden"
+            />
+            <div className="flex gap-3 items-start">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-teal-500 hover:bg-teal-50 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {isUploading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Upload className="w-5 h-5" />
+                )}
+                Tải ảnh lên
+              </button>
               {formData.thumbnailUrl && (
-                <div className="w-16 h-12 rounded-lg overflow-hidden border border-gray-200">
+                <div className="relative w-24 h-16 rounded-lg overflow-hidden border border-gray-200">
                   <img src={formData.thumbnailUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, thumbnailUrl: '' })}
+                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
                 </div>
+              )}
+              {!formData.thumbnailUrl && (
+                <p className="text-sm text-gray-500 py-2">Chưa có ảnh bìa</p>
               )}
             </div>
           </div>
@@ -348,14 +426,28 @@ const TourEditor = ({ tour, onClose, onSaved }) => {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="block text-sm font-medium text-gray-700">Thư viện hình ảnh</label>
-                <button
-                  type="button"
-                  onClick={handleAddImage}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-teal-600 hover:bg-teal-50 rounded-lg"
-                >
-                  <Plus className="w-4 h-4" />
-                  Thêm hình
-                </button>
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAddImage}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-teal-600 hover:bg-teal-50 rounded-lg disabled:opacity-50"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Plus className="w-4 h-4" />
+                    )}
+                    Thêm hình
+                  </button>
+                </div>
               </div>
               {images.length > 0 ? (
                 <div className="grid grid-cols-4 gap-3">

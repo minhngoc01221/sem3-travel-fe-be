@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Star, MapPin, Home, Palmtree, Waves, Dumbbell, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Edit, Trash2, Star, MapPin, Home, Palmtree, Waves, Dumbbell, X, Upload, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import resortService from '@/services/resortService';
 import SearchAndFilter from '@/components/common/SearchAndFilter/SearchAndFilter';
+import CitySelect from '@/components/common/CitySelect/CitySelect';
 
 // Resort Types matching backend enum
 const RESORT_TYPES = [
@@ -38,6 +39,8 @@ const ResortsPage = () => {
   const [editingResort, setEditingResort] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({});
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -196,6 +199,46 @@ const ResortsPage = () => {
       ? currentAmenities.filter(a => a !== amenityValue)
       : [...currentAmenities, amenityValue];
     setFormData({...formData, amenities: newAmenities});
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formDataImg = new FormData();
+      formDataImg.append('file', file);
+
+      const token = localStorage.getItem('token');
+      const res = await fetch('https://localhost:5000/api/upload', {
+        method: 'POST',
+        body: formDataImg,
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+
+      const data = await res.json();
+      const imageUrl = data.url || data.data?.url;
+      
+      setFormData({
+        ...formData,
+        images: [...formData.images, imageUrl]
+      });
+      toast.success('Tải ảnh thành công');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Lỗi khi tải ảnh');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData({...formData, images: newImages});
   };
 
   const filterOptions = {
@@ -383,13 +426,10 @@ const ResortsPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Thành phố *</label>
-                  <input
-                    type="text"
+                  <CitySelect
                     value={formData.city}
-                    onChange={(e) => setFormData({...formData, city: e.target.value})}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                    placeholder="Đà Nẵng"
+                    onChange={(city) => setFormData({...formData, city})}
+                    placeholder="Chọn thành phố"
                   />
                 </div>
 
@@ -449,6 +489,53 @@ const ResortsPage = () => {
                   />
                   <span className="text-sm text-gray-700">Resort nổi bật</span>
                 </label>
+              </div>
+
+              {/* Images */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Hình ảnh</label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-teal-500 hover:bg-teal-50 transition-colors flex items-center justify-center gap-2 text-gray-600 disabled:opacity-50"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Đang tải...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-5 h-5" />
+                      <span>Tải ảnh lên</span>
+                    </>
+                  )}
+                </button>
+
+                {formData.images && formData.images.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2 mt-3">
+                    {formData.images.map((img, index) => (
+                      <div key={index} className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100">
+                        <img src={img} alt={`Resort ${index + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Submit Button */}
